@@ -1,5 +1,5 @@
 // import update from "immutability-helper";
-import { MOVE_CARD, MOVE_COLUMN } from "./actionTypes";
+import { MOVE_CARD, MOVE_COLUMN, SELECTED } from "./actionTypes";
 
 import { nanoid } from "nanoid";
 
@@ -78,12 +78,21 @@ export const initialState = {
       ],
     },
   ],
+  selectedElement: {},
 };
 
 export default function columns(state = initialState, { type, payload }) {
   switch (type) {
+    case SELECTED: {
+      console.log("SELECTED", SELECTED);
+      console.log("selected", payload.selectedElement);
+      return {
+        ...state,
+        selectedElement: { ...payload.selectedElement },
+      };
+    }
     case MOVE_COLUMN: {
-      console.log("MOVE_COLUMN", MOVE_COLUMN);
+      // console.log("MOVE_COLUMN", MOVE_COLUMN);
       const nextState = JSON.parse(JSON.stringify({ ...state }));
       const sourceIndex = nextState.columns.splice(
         nextState.columns.findIndex(
@@ -102,33 +111,48 @@ export default function columns(state = initialState, { type, payload }) {
     }
     case MOVE_CARD: {
       console.log("MOVE_CARD", MOVE_CARD);
-      const cardsState = JSON.parse(JSON.stringify({ ...state }));
-      // console.log("cardsState", cardsState.columns.cards.id);
+      const prevState = JSON.parse(JSON.stringify({ ...state }));
+      console.log("prevState", prevState);
 
-      const sourceCardIndex = cardsState.columns.map((col) =>
-        col.cards.splice(
-          col.cards.findIndex((card) => card.id === payload.targetCardId),
-          1
-        )
+      const sourceColumnIndex = prevState.columns.findIndex(
+        (item) => item.id === payload.sourceColumnId
       );
 
-      const targetCardIndex = state.columns.map((col) =>
-        col.cards.findIndex((item) => item.id === payload.targetCardId)
+      const targetColumnIndex = prevState.columns.findIndex(
+        (item) => item.id === payload.targetColumnId
       );
 
-      const newColumns = state.columns.map((col) =>
-        col.id === payload.sourceColumnId
-          ? {
-              ...col,
-              cards: col.cards.splice(targetCardIndex, 0, sourceCardIndex[0]),
-            }
-          : col
+      const sourceCardIndex = prevState.columns[
+        sourceColumnIndex
+      ].cards.findIndex((card) => card.id === payload.sourceCardId);
+      console.log("sourceCardIndex", sourceCardIndex);
+      console.log("targetColumnIndex", targetColumnIndex);
+
+      // delete sourceCardIndex;
+      const deletedElement = prevState.columns[sourceColumnIndex].cards.splice(
+        sourceCardIndex,
+        1
+      );
+      console.log("deletedElement", deletedElement[0], sourceColumnIndex);
+      console.log("payload.targetColumnId", payload);
+      // console.log("targetColumnIndex", targetColumnIndex);
+
+      console.log("prevState", prevState);
+
+      const targetCardIndex = state.columns[targetColumnIndex].cards.findIndex(
+        (card) => card.id === payload.targetCardId
+      );
+      console.log("targetCardIndex", targetCardIndex);
+
+      prevState.columns[targetColumnIndex].cards.splice(
+        targetCardIndex,
+        0,
+        deletedElement[0]
       );
 
-      return {
-        ...state,
-        columns: newColumns,
-      };
+      console.log("prevState", prevState);
+
+      return prevState;
     }
     default:
       return state;

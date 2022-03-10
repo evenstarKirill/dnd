@@ -1,11 +1,16 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { connect, useDispatch, useSelector } from "react-redux";
 import { useDrag, useDrop } from "react-dnd";
 
 import { ItemTypes } from "../../itemTypes";
+import { selected } from "../../redux/action";
 import styles from "./Card.module.scss";
 
-function Card({ text, card_key, card_id, id, moveCard }) {
+function Card({ text, card_key, id, moveCard, col_id }) {
   const ref = useRef(null);
+  const dispatch = useDispatch();
+  const sourceCol = useSelector((store) => [store]);
+  console.log("sourceCol", sourceCol[0].selectedElement.card_id);
 
   const [newTarget, setNewTarget] = useState(id);
 
@@ -18,7 +23,8 @@ function Card({ text, card_key, card_id, id, moveCard }) {
     },
 
     drop(item, monitor) {
-      console.log("id, item.id", id, item.id);
+      // console.log("id, item.id", id, item.id);
+      console.log("item", item, id);
       if (!ref.current) {
         return;
       }
@@ -53,7 +59,13 @@ function Card({ text, card_key, card_id, id, moveCard }) {
         return;
       }
       item.id = targetId;
-      moveCard(sourceId, targetId);
+      console.log("target_col_id", col_id);
+      moveCard(
+        sourceId,
+        targetId,
+        sourceCol[0].selectedElement.column_id,
+        col_id
+      );
     },
   });
 
@@ -67,9 +79,25 @@ function Card({ text, card_key, card_id, id, moveCard }) {
       isDragging: monitor.isDragging(),
     }),
   });
+
   drag(drop(ref));
 
-  console.log("!!isDragging", isDragging);
+  useEffect(() => {
+    if (isDragging) {
+      dispatch(
+        selected({
+          selectedElement: {
+            card_id: id,
+            column_id: col_id,
+          },
+        })
+      );
+    } else {
+      return null;
+    }
+  }, [isDragging]);
+
+  // console.log("!!isDragging_CARD", isDragging);
 
   return (
     <div
@@ -80,7 +108,7 @@ function Card({ text, card_key, card_id, id, moveCard }) {
       ref={ref}
       className={styles.card}
       key={card_key}
-      id={card_id}
+      id={id}
     >
       {text}
     </div>

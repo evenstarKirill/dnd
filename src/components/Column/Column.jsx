@@ -8,14 +8,23 @@ import { SourceBox } from "../SourceBox/SourceBox";
 import styles from "./Column.module.scss";
 import { swapCards } from "../../redux/action";
 
-function Column({ title, cards, id_key, id, moveColumn }) {
+function Column({ title, cards, id_key, id, moveColumn, col_id }) {
   const dispatch = useDispatch();
   // const columns = useSelector((store) => [...store.columns]);
 
-  const moveCard = (sourceCardId, targetCardId) =>
-    dispatch(swapCards({ sourceCardId, targetCardId }));
+  const moveCard = (
+    sourceCardId,
+    targetCardId,
+    sourceColumnId,
+    targetColumnId
+  ) =>
+    dispatch(
+      swapCards({ sourceCardId, targetCardId, sourceColumnId, targetColumnId })
+    );
 
   const [newTarget, setNewTarget] = useState(id);
+  const [targetColId, setTargetColId] = useState();
+
   const ref = useRef(null);
   const [{ isDropped }, drop] = useDrop({
     accept: ItemTypes.COLUMN,
@@ -25,24 +34,27 @@ function Column({ title, cards, id_key, id, moveColumn }) {
       };
     },
     drop(item, monitor) {
+      console.log("item, monitor", item, monitor);
       if (!ref.current) {
         // console.log("!ref.current");
         return;
       }
       const sourceId = item.id;
       const targetId = id;
+      setTargetColId(targetId);
+      // console.log("targetId", targetId);
 
       if (sourceId === targetId) {
         return;
       }
       const hoverBoundingRect = ref.current?.getBoundingClientRect();
-      console.log("hoverBoundingRect", hoverBoundingRect);
+      // console.log("hoverBoundingRect", hoverBoundingRect);
       const hoverMiddleX =
         (hoverBoundingRect.right - hoverBoundingRect.left) / 2;
       const clientOffset = monitor.getClientOffset();
-      console.log("clientOffset", clientOffset);
+      // console.log("clientOffset", clientOffset);
       const hoverClientX = clientOffset.x - hoverBoundingRect.left;
-      console.log("hoverClientX", hoverClientX);
+      // console.log("hoverClientX", hoverClientX);
 
       if (targetId - sourceId === 1 && hoverClientX > hoverMiddleX) {
         return;
@@ -61,7 +73,9 @@ function Column({ title, cards, id_key, id, moveColumn }) {
         setNewTarget(targetId - 1);
       }
       item.id = targetId;
-      moveColumn(sourceId, targetId, () => console.log("asd"));
+      // setTargetColId(targetId);
+      moveColumn(sourceId, targetId);
+      // console.log("targetId", targetId);
     },
   });
 
@@ -76,6 +90,7 @@ function Column({ title, cards, id_key, id, moveColumn }) {
   });
   const opacity = isDragging ? 0 : 1;
   drag(drop(ref));
+  console.log("targetColId", targetColId);
 
   return (
     <div
@@ -96,6 +111,7 @@ function Column({ title, cards, id_key, id, moveColumn }) {
             card_key={card.id}
             id={card.id}
             key={card.id}
+            col_id={id}
           />
         ))}
       </div>

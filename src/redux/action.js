@@ -1,4 +1,4 @@
-import { MOVE_CARD, MOVE_COLUMN } from "./actionTypes";
+import { MOVE_CARD, MOVE_COLUMN, SELECTED } from "./actionTypes";
 
 export const swapColumns = ({ sourceColumnId, targetColumnId, cb }) => ({
   type: MOVE_COLUMN,
@@ -22,4 +22,9 @@ export const swapCards = ({
     sourceColumnId,
     targetColumnId,
   },
+});
+
+export const selected = ({ selectedElement }) => ({
+  type: SELECTED,
+  payload: { selectedElement },
 });

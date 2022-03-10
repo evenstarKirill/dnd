@@ -5,14 +5,13 @@ import styles from "./ColumnList.module.scss";
 import { swapColumns } from "../../redux/action";
 
 function ColumnList() {
-  // console.log("ColumnList");
   const dispatch = useDispatch();
   const columns = useSelector((store) => [...store.columns]);
 
   const moveColumn = (sourceColumnId, targetColumnId) =>
     dispatch(swapColumns({ sourceColumnId, targetColumnId }));
 
-  console.log("columns", columns);
+  // console.log("columns", columns);
 
   return (
     <div className={styles.wrapper}>
@@ -24,24 +23,11 @@ function ColumnList() {
           id={col.id}
           moveColumn={moveColumn}
           cards={[...col.cards]}
+          col_id={col.id}
         />
       ))}
     </div>
   );
 }
 
-// const mapStateToProps = (state) => {
-//   return {
-//     data: [...state.columns],
-//   };
-// };
-
-// const mapDispatchToProps = (dispatch) => ({
-//   swapC: (sourceColumnId, targetColumnId) =>
-//     dispatch(swapColumns({ sourceColumnId, targetColumnId })),
-// });
-
-// export default connect(mapStateToProps, mapDispatchToProps)(ColumnList);
 export default ColumnList;
-
-// export default connect(mapStateToProps, mapDispatchToProps)(NoteList)
