@@ -27,7 +27,7 @@ function Column({ title, cards, id_key, id, moveColumn, col_id }) {
 
   const ref = useRef(null);
   const [{ isDropped }, drop] = useDrop({
-    accept: ItemTypes.COLUMN,
+    accept: [ItemTypes.COLUMN],
     collect(monitor) {
       return {
         handlerId: monitor.getHandlerId(),
@@ -74,7 +74,7 @@ function Column({ title, cards, id_key, id, moveColumn, col_id }) {
       }
       item.id = targetId;
       // setTargetColId(targetId);
-      moveColumn(sourceId, targetId);
+      moveColumn(sourceId, newTarget);
       // console.log("targetId", targetId);
     },
   });
