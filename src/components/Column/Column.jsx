@@ -1,12 +1,12 @@
 import React, { useRef, useState } from "react";
 import { connect, useDispatch, useSelector } from "react-redux";
+import { swapCards, swapCardsToEmptyColumn } from "../../redux/action";
 import { useDrag, useDrop } from "react-dnd";
 
 import Card from "../Card/Card";
+import InputCard from "../Card/InputCard";
 import { ItemTypes } from "../../itemTypes";
-import { SourceBox } from "../SourceBox/SourceBox";
 import styles from "./Column.module.scss";
-import { swapCards } from "../../redux/action";
 
 function Column({ title, cards, id_key, id, moveColumn, col_id }) {
   const dispatch = useDispatch();
@@ -20,6 +20,15 @@ function Column({ title, cards, id_key, id, moveColumn, col_id }) {
   ) =>
     dispatch(
       swapCards({ sourceCardId, targetCardId, sourceColumnId, targetColumnId })
+    );
+
+  const moveCardToEmptyColumn = (
+    sourceCardId,
+    sourceColumnId,
+    targetColumnId
+  ) =>
+    dispatch(
+      swapCardsToEmptyColumn({ sourceCardId, sourceColumnId, targetColumnId })
     );
 
   const [newTarget, setNewTarget] = useState(id);
@@ -104,6 +113,7 @@ function Column({ title, cards, id_key, id, moveColumn, col_id }) {
     >
       <h1 className={styles.title}>{title}</h1>
       <div className={styles.cards_wrapper}>
+        <InputCard moveCardToEmptyColumn={moveCardToEmptyColumn} col_id={id} />
         {cards.map((card) => (
           <Card
             moveCard={moveCard}

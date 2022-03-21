@@ -1,4 +1,9 @@
-import { MOVE_CARD, MOVE_COLUMN, SELECTED } from "./actionTypes";
+import {
+  MOVE_CARD,
+  MOVE_CARD_TO_EMPTY_COLUMN,
+  MOVE_COLUMN,
+  SELECTED,
+} from "./actionTypes";
 
 export const swapColumns = ({ sourceColumnId, targetColumnId, cb }) => ({
   type: MOVE_COLUMN,
@@ -19,6 +24,19 @@ export const swapCards = ({
   payload: {
     sourceCardId,
     targetCardId,
+    sourceColumnId,
+    targetColumnId,
+  },
+});
+
+export const swapCardsToEmptyColumn = ({
+  sourceCardId,
+  sourceColumnId,
+  targetColumnId,
+}) => ({
+  type: MOVE_CARD_TO_EMPTY_COLUMN,
+  payload: {
+    sourceCardId,
     sourceColumnId,
     targetColumnId,
   },
