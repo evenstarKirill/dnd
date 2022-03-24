@@ -8,22 +8,24 @@ function ColumnList() {
   const dispatch = useDispatch();
   const columns = useSelector((store) => [...store.columns]);
 
-  const moveColumn = (sourceColumnId, targetColumnId) =>
-    dispatch(swapColumns({ sourceColumnId, targetColumnId }));
+  const moveColumn = (sourceColumnIndex, targetColumnIndex) =>
+    dispatch(swapColumns({ sourceColumnIndex, targetColumnIndex }));
 
   // console.log("columns", columns);
 
   return (
     <div className={styles.wrapper}>
-      {columns.map((col) => (
+      {columns.map((col, index) => (
         <Column
-          title={col.title}
-          id_key={col.id}
+          // title={col.title}
+          column={col}
+          // id_key={col.id}
           key={col.id}
           id={col.id}
           moveColumn={moveColumn}
           cards={[...col.cards]}
-          col_id={col.id}
+          col_index={index}
+          // col_id={col.id}
         />
       ))}
     </div>

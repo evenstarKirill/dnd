@@ -10,8 +10,8 @@ function InputCard({ card_key, id, moveCardToEmptyColumn, col_id }) {
   const ref = useRef(null);
   const dispatch = useDispatch();
   const sourceCol = useSelector((store) => [store]);
-  console.log("sourceCol", sourceCol[0].selectedElement.card_id);
-  console.log("id", id);
+  // console.log("sourceCol", sourceCol[0].selectedElement.card_id);
+  // console.log("id", id);
 
   const [newTarget, setNewTarget] = useState(id);
 

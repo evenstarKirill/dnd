@@ -3,29 +3,29 @@ import {
   MOVE_CARD_TO_EMPTY_COLUMN,
   MOVE_COLUMN,
   SELECTED,
+  TEST,
 } from "./actionTypes";
 
-export const swapColumns = ({ sourceColumnId, targetColumnId, cb }) => ({
+export const swapColumns = ({ sourceColumnIndex, targetColumnIndex }) => ({
   type: MOVE_COLUMN,
   payload: {
-    sourceColumnId,
-    targetColumnId,
-    cb,
+    sourceColumnIndex,
+    targetColumnIndex,
   },
 });
 
 export const swapCards = ({
-  sourceCardId,
-  targetCardId,
-  sourceColumnId,
-  targetColumnId,
+  sourceCardIndex,
+  targetCardIndex,
+  sourceColumnIndex,
+  targetColumnIndex,
 }) => ({
   type: MOVE_CARD,
   payload: {
-    sourceCardId,
-    targetCardId,
-    sourceColumnId,
-    targetColumnId,
+    sourceCardIndex,
+    targetCardIndex,
+    sourceColumnIndex,
+    targetColumnIndex,
   },
 });
 
@@ -45,4 +45,8 @@ export const swapCardsToEmptyColumn = ({
 export const selected = ({ selectedElement }) => ({
   type: SELECTED,
   payload: { selectedElement },
+});
+
+export const test = () => ({
+  type: TEST,
 });
