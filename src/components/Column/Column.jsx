@@ -1,88 +1,142 @@
-import React, { useRef, useState } from "react";
-import { connect, useDispatch, useSelector } from "react-redux";
+import React, { useCallback, useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useDrag, useDrop } from "react-dnd";
 
 import Card from "../Card/Card";
 import { ItemTypes } from "../../itemTypes";
-import { SourceBox } from "../SourceBox/SourceBox";
 import styles from "./Column.module.scss";
 import { swapCards } from "../../redux/action";
 
-function Column({ title, cards, id_key, id, moveColumn, col_id }) {
+function Column({ cards, id, moveColumn, col_id, column, col_index }) {
   const dispatch = useDispatch();
-  // const columns = useSelector((store) => [...store.columns]);
+  const store = useSelector((store) => [store]);
 
-  const moveCard = (
-    sourceCardId,
-    targetCardId,
-    sourceColumnId,
-    targetColumnId
-  ) =>
-    dispatch(
-      swapCards({ sourceCardId, targetCardId, sourceColumnId, targetColumnId })
-    );
+  const moveCard = useCallback(
+    (
+      sourceCardIndex,
+      targetCardIndex,
+      sourceColumnIndex,
+      targetColumnIndex
+    ) => {
+      dispatch(
+        swapCards({
+          sourceCardIndex,
+          targetCardIndex,
+          sourceColumnIndex,
+          targetColumnIndex,
+        })
+      );
+    },
+    []
+  );
 
-  const [newTarget, setNewTarget] = useState(id);
-  const [targetColId, setTargetColId] = useState();
+  const [newColumnTarget, setNewColumnTarget] = useState(col_index);
 
   const ref = useRef(null);
   const [{ isDropped }, drop] = useDrop({
-    accept: [ItemTypes.COLUMN],
+    accept: [ItemTypes.COLUMN, ItemTypes.CARD],
     collect(monitor) {
       return {
         handlerId: monitor.getHandlerId(),
       };
     },
     drop(item, monitor) {
-      console.log("item, monitor", item, monitor);
-      if (!ref.current) {
-        // console.log("!ref.current");
-        return;
-      }
-      const sourceId = item.id;
-      const targetId = id;
-      setTargetColId(targetId);
-      // console.log("targetId", targetId);
+      if (monitor.getItemType() === ItemTypes.COLUMN) {
+        if (!ref.current) {
+          return;
+        }
 
-      if (sourceId === targetId) {
-        return;
-      }
-      const hoverBoundingRect = ref.current?.getBoundingClientRect();
-      // console.log("hoverBoundingRect", hoverBoundingRect);
-      const hoverMiddleX =
-        (hoverBoundingRect.right - hoverBoundingRect.left) / 2;
-      const clientOffset = monitor.getClientOffset();
-      // console.log("clientOffset", clientOffset);
-      const hoverClientX = clientOffset.x - hoverBoundingRect.left;
-      // console.log("hoverClientX", hoverClientX);
+        const sourceIndex = store[0].columns.findIndex(
+          (col) => col.id === item.id
+        );
+        const targetIndex = store[0].columns.findIndex((col) => col.id === id);
+        const sourceId = item.id;
+        const targetId = id;
 
-      if (targetId - sourceId === 1 && hoverClientX > hoverMiddleX) {
-        return;
-      }
+        if (sourceId === targetId) {
+          return;
+        }
+        const hoverBoundingRect = ref.current?.getBoundingClientRect();
+        const hoverMiddleX =
+          (hoverBoundingRect.right - hoverBoundingRect.left) / 2;
+        const clientOffset = monitor.getClientOffset();
+        const hoverClientX = clientOffset.x - hoverBoundingRect.left;
 
-      if (sourceId < targetId && hoverClientX < hoverMiddleX) {
-        setNewTarget(targetId - 1);
-        // return;
-      }
+        if (targetIndex - sourceIndex === 1 && hoverClientX > hoverMiddleX) {
+          return;
+        }
 
-      if (sourceId - targetId === 1 && hoverClientX > hoverMiddleX) {
-        return;
-      }
+        if (sourceIndex < targetIndex && hoverClientX < hoverMiddleX) {
+          setNewColumnTarget(targetIndex + 1);
+        }
 
-      if (sourceId > targetId && hoverClientX < hoverMiddleX) {
-        setNewTarget(targetId - 1);
+        if (sourceId - targetId === 1 && hoverClientX > hoverMiddleX) {
+          return;
+        }
+
+        if (sourceIndex > targetIndex && hoverClientX < hoverMiddleX) {
+          setNewColumnTarget(targetIndex - 1);
+        }
+        item.id = targetIndex;
+        console.log("newTarget", newColumnTarget);
+
+        moveColumn(sourceIndex, targetIndex);
       }
-      item.id = targetId;
-      // setTargetColId(targetId);
-      moveColumn(sourceId, newTarget);
-      // console.log("targetId", targetId);
+      if (monitor.getItemType() === ItemTypes.CARD) {
+        if (store[0].columns[col_index].cards.length > 1) {
+          return;
+        }
+        const sourceId = item.id;
+
+        const sourceColumnIndex = store[0].columns.findIndex(
+          (col) => col.id === store[0].selectedElement.column_id
+        );
+        console.log(
+          "🚀 ~ file: Column.jsx ~ line 137 ~ drop ~ sourceColumnIndex",
+          sourceColumnIndex
+        );
+
+        const sourceCardIndex = store[0].columns[
+          sourceColumnIndex
+        ].cards.findIndex((card) => card.id === item.id);
+
+        console.log(
+          "🚀 ~ file: Column.jsx ~ line 140 ~ drop ~ sourceCardIndex",
+          sourceCardIndex
+        );
+
+        const targetColumnIndex = store[0].columns.findIndex(
+          (col) => col.id === id
+        );
+        console.log(
+          "🚀 ~ file: Column.jsx ~ line 151 ~ drop ~ targetColumnIndex",
+          targetColumnIndex
+        );
+
+        const targetCardIndex = 0;
+
+        console.log("store[0]", store[0].columns[col_index].cards);
+
+        if (
+          !cards.id &&
+          !!sourceId &&
+          store[0].columns[col_index].cards.length < 1
+        ) {
+          moveCard(
+            sourceCardIndex,
+            targetCardIndex,
+            sourceColumnIndex,
+            targetColumnIndex
+          );
+        }
+      }
     },
   });
 
   const [{ isDragging }, drag] = useDrag({
     type: ItemTypes.COLUMN,
     item: () => {
-      return { id };
+      return { id, col_index };
     },
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
@@ -90,28 +144,28 @@ function Column({ title, cards, id_key, id, moveColumn, col_id }) {
   });
   const opacity = isDragging ? 0 : 1;
   drag(drop(ref));
-  console.log("targetColId", targetColId);
 
   return (
     <div
       className={styles.wrapper}
-      key={id_key}
+      key={column.id}
       style={{
-        opacity: isDragging ? 0 : 1,
+        opacity: opacity,
         background: isDropped ? "gray" : "wheat",
       }}
       ref={ref}
     >
-      <h1 className={styles.title}>{title}</h1>
+      <h1 className={styles.title}>{column.title}</h1>
       <div className={styles.cards_wrapper}>
-        {cards.map((card) => (
+        {cards.map((card, index) => (
           <Card
             moveCard={moveCard}
-            text={card.text}
-            card_key={card.id}
+            card_index={index}
+            col_index={col_index}
+            card={card}
             id={card.id}
             key={card.id}
-            col_id={id}
+            col_id={column.id}
           />
         ))}
       </div>

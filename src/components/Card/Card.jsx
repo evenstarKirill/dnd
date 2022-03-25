@@ -1,18 +1,17 @@
 import React, { useEffect, useRef, useState } from "react";
 import { connect, useDispatch, useSelector } from "react-redux";
+import { selected, test } from "../../redux/action";
 import { useDrag, useDrop } from "react-dnd";
 
 import { ItemTypes } from "../../itemTypes";
-import { selected } from "../../redux/action";
 import styles from "./Card.module.scss";
 
-function Card({ text, card_key, id, moveCard, col_id }) {
+function Card({ id, moveCard, col_id, card, card_index }) {
   const ref = useRef(null);
   const dispatch = useDispatch();
-  const sourceCol = useSelector((store) => [store]);
-  console.log("sourceCol", sourceCol[0].selectedElement.card_id);
+  const store = useSelector((store) => [store]);
 
-  const [newTarget, setNewTarget] = useState(id);
+  const [newCardTargetIndex, setNewCardTarget] = useState(card_index);
 
   const [{ isDropped }, drop] = useDrop({
     accept: ItemTypes.CARD,
@@ -23,13 +22,70 @@ function Card({ text, card_key, id, moveCard, col_id }) {
     },
 
     drop(item, monitor) {
-      // console.log("id, item.id", id, item.id);
-      console.log("item", item, id);
       if (!ref.current) {
         return;
       }
+
+      console.log(
+        "store[0].selectedElement,",
+        store[0].selectedElement.column_id
+      );
+      const sourceColumnIndex = store[0].columns.findIndex(
+        (col) => col.id === store[0].selectedElement.column_id
+      );
+      console.log(
+        "🚀 ~ file: Card.jsx ~ line 50 ~ drop ~ sourceColumnIndex",
+        sourceColumnIndex
+      );
+
+      const sourceCardIndex = store[0].columns[
+        sourceColumnIndex
+      ].cards.findIndex((card) => card.id === item.id);
+
+      if (sourceCardIndex === -1) {
+        return;
+      }
+
+      console.log(
+        "🚀 ~ file: Card.jsx ~ line 64 ~ drop ~ sourceCardIndex",
+        sourceCardIndex
+      );
+
+      const targetColumnIndex = store[0].columns.findIndex(
+        (col) => col.id === col_id
+      );
+
+      console.log(
+        "🚀 ~ file: Card.jsx ~ line 54 ~ drop ~ targetColumnIndex",
+        targetColumnIndex
+      );
+
+      const targetCardIndex = store[0].columns[
+        targetColumnIndex
+      ].cards.findIndex((card) => card.id === id);
+
+      console.log(
+        "🚀 ~ file: Card.jsx ~ line 70 ~ drop ~ targetCardIndex",
+        targetCardIndex
+      );
+
+      const cardsArray = store[0].columns[targetColumnIndex].cards;
+
+      console.log(
+        "🚀 ~ file: Card.jsx ~ line 80 ~ drop ~ cardsArray",
+        cardsArray.length
+      );
+
+      if (cardsArray.length < 1) {
+        return;
+      }
+
       const sourceId = item.id;
       const targetId = id;
+
+      if (!targetId) {
+        return;
+      }
 
       if (sourceId === targetId) {
         return;
@@ -42,29 +98,36 @@ function Card({ text, card_key, id, moveCard, col_id }) {
       const clientOffset = monitor.getClientOffset();
       const hoverClientY = clientOffset.y - hoverBoundingRect.top;
 
-      if (targetId - sourceId === 1 && hoverClientY > hoverMiddleY) {
+      if (
+        targetCardIndex - sourceCardIndex === 1 &&
+        hoverClientY > hoverMiddleY
+      ) {
         return;
       }
 
-      if (sourceId < targetId && hoverClientY < hoverMiddleY) {
-        setNewTarget(targetId - 1);
+      if (sourceCardIndex < targetCardIndex && hoverClientY < hoverMiddleY) {
+        setNewCardTarget(targetCardIndex - 1);
       }
 
-      if (sourceId - targetId === 1 && hoverClientY > hoverMiddleY) {
+      if (
+        sourceCardIndex - targetCardIndex === 1 &&
+        hoverClientY > hoverMiddleY
+      ) {
         return;
       }
 
-      if (sourceId > targetId && hoverClientY > hoverMiddleY) {
-        setNewTarget(targetId - 1);
+      if (sourceCardIndex > targetCardIndex && hoverClientY > hoverMiddleY) {
+        setNewCardTarget(targetCardIndex - 1);
         return;
       }
-      item.id = targetId;
-      console.log("target_col_id", col_id);
+
+      console.log("newCardTargetIndex", newCardTargetIndex);
+
       moveCard(
-        sourceId,
-        targetId,
-        sourceCol[0].selectedElement.column_id,
-        col_id
+        sourceCardIndex,
+        targetCardIndex,
+        sourceColumnIndex,
+        targetColumnIndex
       );
     },
   });
@@ -73,7 +136,7 @@ function Card({ text, card_key, id, moveCard, col_id }) {
     type: ItemTypes.CARD,
     canDrag: !!ref,
     item: () => {
-      return { id };
+      return { id, card_index };
     },
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
@@ -97,8 +160,6 @@ function Card({ text, card_key, id, moveCard, col_id }) {
     }
   }, [isDragging]);
 
-  // console.log("!!isDragging_CARD", isDragging);
-
   return (
     <div
       style={{
@@ -107,10 +168,10 @@ function Card({ text, card_key, id, moveCard, col_id }) {
       }}
       ref={ref}
       className={styles.card}
-      key={card_key}
-      id={id}
+      key={card.id}
+      id={card.id}
     >
-      {text}
+      {card.text}
     </div>
   );
 }
