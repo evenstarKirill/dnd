@@ -1,11 +1,5 @@
 // import update from "immutability-helper";
-import {
-  MOVE_CARD,
-  MOVE_CARD_TO_EMPTY_COLUMN,
-  MOVE_COLUMN,
-  SELECTED,
-  TEST,
-} from "./actionTypes";
+import { MOVE_CARD, MOVE_COLUMN, SELECTED } from "./actionTypes";
 
 import { nanoid } from "nanoid";
 
@@ -50,17 +44,7 @@ export const initialState = {
 
 export default function columns(state = initialState, { type, payload }) {
   switch (type) {
-    case TEST: {
-      // console.log("SELECTED", SELECTED);
-      // console.log("selected", payload.selectedElement);
-      return {
-        ...state,
-        test: false,
-      };
-    }
     case SELECTED: {
-      // console.log("SELECTED", SELECTED);
-      // console.log("selected", payload.selectedElement);
       return {
         ...state,
         selectedElement: { ...payload.selectedElement },
@@ -104,6 +88,12 @@ export default function columns(state = initialState, { type, payload }) {
       const deletedElement = prevState.columns[
         payload.sourceColumnIndex
       ].cards.splice(payload.sourceCardIndex, 1);
+      console.log(
+        "🚀 ~ file: reducer.js ~ line 105 ~ columns ~ deletedElement",
+        deletedElement
+      );
+      console.log("payload", payload);
+
       // console.log("deletedElement", deletedElement[0], sourceColumnIndex);
       // console.log("payload.targetColumnId", payload);
       // console.log("targetColumnIndex", targetColumnIndex);
@@ -146,57 +136,6 @@ export default function columns(state = initialState, { type, payload }) {
 
       // console.log("prevState", prevState);
       // prevState.test = true;
-      // console.log("prevState", prevState);
-
-      return prevState;
-    }
-    case MOVE_CARD_TO_EMPTY_COLUMN: {
-      console.log("MOVE_CARD_TO_EMPTY_COLUMN", MOVE_CARD_TO_EMPTY_COLUMN);
-      // if (payload.targetCardId) {
-      //   return;
-      // }
-      console.log("payload.targetCardId", payload.targetCardId);
-      const prevState = JSON.parse(JSON.stringify({ ...state }));
-
-      const sourceColumnIndex = prevState.columns.findIndex(
-        (item) => item.id === payload.sourceColumnId
-      );
-
-      const targetColumnIndex = prevState.columns.findIndex(
-        (item) => item.id === payload.targetColumnId
-      );
-
-      const sourceCardIndex = prevState.columns[
-        sourceColumnIndex
-      ].cards.findIndex((card) => card.id === payload.sourceCardId);
-      // console.log("sourceCardIndex", sourceCardIndex);
-      // console.log("targetColumnIndex", targetColumnIndex);
-
-      // delete sourceCardIndex;
-      const deletedElement = prevState.columns[sourceColumnIndex].cards.splice(
-        sourceCardIndex,
-        1
-      );
-      console.log("deletedElement", deletedElement[0]);
-
-      // if (prevState.columns[targetColumnIndex].cards.length > 1) {
-      //   return;
-      // }
-      // console.log(
-      //   "prevState",
-      //   prevState.columns[targetColumnIndex].cards.length
-      // );
-      // console.log("deletedElement", deletedElement[0], sourceColumnIndex);
-      // console.log("payload.targetColumnId", payload);
-      // console.log("targetColumnIndex", targetColumnIndex);
-
-      // console.log("prevState", prevState);
-
-      // const targetCardIndex = 0;
-      // console.log("targetCardIndex", targetCardIndex);
-
-      prevState.columns[targetColumnIndex].cards.push(deletedElement[0]);
-
       // console.log("prevState", prevState);
 
       return prevState;
